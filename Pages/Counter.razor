@@ -1,5 +1,4 @@
-﻿
-@page "/counter"
+﻿@page "/counter"
 @using H5ServerSideProgrammeringMJ.Data;
 @using H5ServerSideProgrammeringMJ.JCodes;
 @inject ToDoDBHandler toDoDBHandler
@@ -26,8 +25,11 @@
 
     private void testCreate()
     {
-        //toDoDBHandler.Create("", toDoContext);
+        //toDoDBHandler.Create("","","", toDoContext);
+        //toDoDBHandler.Read("", toDoContext);
 
-        toDoDBHandler.Read("", toDoContext);
+        //toDoDBHandler.Update("", "", 1, toDoContext);
+
+        toDoDBHandler.Delete("", "", 10, toDoContext);
     }
 }

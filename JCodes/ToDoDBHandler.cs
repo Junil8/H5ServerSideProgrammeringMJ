@@ -26,7 +26,25 @@ namespace H5ServerSideProgrammeringMJ.JCodes
             return toDoList;
         }
         // Update
+        public ToDo Update(string taskName, string TaskDescription, int id, ToDoContext context)
+        {
+            var result = context.ToDos.SingleOrDefault(todo => todo.Id == id);
+
+            result.TaskName = taskName;
+            result.TaskDescription = TaskDescription;
+
+            context.SaveChanges();
+            return result;
+        }
         // Delete
+        public ToDo Delete(string taskName, string TaskDescription, int id, ToDoContext context)
+        {
+            var result = context.ToDos.SingleOrDefault(todo => todo.Id ==  id);
+
+            context.ToDos.Remove(result);
+            context.SaveChanges();
+            return result;
+        }
 
 
 
