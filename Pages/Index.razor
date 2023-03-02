@@ -1,15 +1,37 @@
 ﻿@page "/"
+@using H5ServerSideProgrammeringMJ.Data;
+@using H5ServerSideProgrammeringMJ.JCodes;
+@using H5ServerSideProgrammeringMJ.Models;
 @using Microsoft.AspNetCore.Identity;
+@inject ToDoDBHandler toDoDBHandler
+@inject ToDoContext toDoContext
 
 @if (isAuthenticated)
 {
     <p>Du er logget ind som: @username</p>
+
+    <table>
+        <tr>
+        <th> Id</th>
+        <th> TaskName</th>
+        <th> TaskDescription</th>
+        </tr>
+        @foreach (ToDo todo in toDoList)
+        {
+            <tr>
+                <td>@todo.Id</td>
+                <td>@todo.TaskName</td>
+                <td>@todo.TaskDescription</td>
+                <button @onclick="() => deleteRow(todo)">delete</button>
+            </tr>
+        }
+    </table>
+
 }
 else
 {
     <p>Velkommen! Du skal logge ind for at se din ToDo liste</p>
 }
-
 <PageTitle>Index</PageTitle>
 
 @code {
@@ -20,11 +42,28 @@ else
     public string username { get; set; }
     private bool isAuthenticated { get; set; }
 
+    private List<ToDo> toDoList { get; set; }
+
     protected override async Task OnInitializedAsync()
     {
         var authState = await authenticationState;
         var user = authState.User;
         username = user.Identity.Name;
         isAuthenticated = user.Identity.IsAuthenticated;
+
+        toDoList = toDoDBHandler.Read(username, toDoContext);
     }
+
+    //toDoDBHandler.Create("","","", toDoContext);
+    //toDoDBHandler.Read("", toDoContext);
+    //toDoDBHandler.Update("", "", 1, toDoContext);
+    //toDoDBHandler.Delete("", "", 10, toDoContext);
+
+    private void deleteRow(ToDo todo)
+    {
+        toDoDBHandler.Delete(todo.Id, toDoContext);
+
+        toDoList = toDoDBHandler.Read(username, toDoContext);
+    }
+
 }

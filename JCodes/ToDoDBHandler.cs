@@ -37,7 +37,7 @@ namespace H5ServerSideProgrammeringMJ.JCodes
             return result;
         }
         // Delete
-        public ToDo Delete(string taskName, string TaskDescription, int id, ToDoContext context)
+        public ToDo Delete(int id, ToDoContext context)
         {
             var result = context.ToDos.SingleOrDefault(todo => todo.Id ==  id);
 
@@ -45,9 +45,5 @@ namespace H5ServerSideProgrammeringMJ.JCodes
             context.SaveChanges();
             return result;
         }
-
-
-
-
     }
 }
