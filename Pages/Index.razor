@@ -10,18 +10,28 @@
 {
     <p>Du er logget ind som: @username</p>
 
+    <input type="text" @bind="@newTaskName" @oninput="@((input) => { newTaskName = (string)input.Value; })">
+    <input type="text" @bind="@newTaskDescription" @oninput="@((input) => { newTaskDescription = (string)input.Value; })">
+    <button @onclick="() => createRow()">create</button>
+    <br />
+    <input disabled="@disableUpdate" type="text" @bind="@updateTaskName" @oninput="@((input) => { updateTaskName = (string)input.Value; })">
+    <input disabled="@disableUpdate" type="text" @bind="@updateTaskDescription" @oninput="@((input) => { updateTaskDescription = (string)input.Value; })">
+    <button disabled="@disableUpdate" @onclick="() => updateRow()">update</button>
+
     <table>
         <tr>
-        <th> Id</th>
-        <th> TaskName</th>
-        <th> TaskDescription</th>
+            <th> Id</th>
+            <th> TaskName</th>
+            <th> TaskDescription</th>
+            <th>   </th>
         </tr>
         @foreach (ToDo todo in toDoList)
         {
             <tr>
                 <td>@todo.Id</td>
-                <td>@todo.TaskName</td>
+                <td>@todo.TaskName"</td>
                 <td>@todo.TaskDescription</td>
+                <button @onclick="() => selectUpdateRow(todo)">select</button>
                 <button @onclick="() => deleteRow(todo)">delete</button>
             </tr>
         }
@@ -44,25 +54,50 @@ else
 
     private List<ToDo> toDoList { get; set; }
 
+    private string newTaskName { get; set; }
+    private string newTaskDescription { get; set; }
+
+    private bool disableUpdate { get; set; }
+    private int updateTaskId { get; set; }
+    private string updateTaskName { get; set; }
+    private string updateTaskDescription { get; set; }
+
     protected override async Task OnInitializedAsync()
     {
         var authState = await authenticationState;
         var user = authState.User;
         username = user.Identity.Name;
         isAuthenticated = user.Identity.IsAuthenticated;
-
+        disableUpdate = true;
+        toDoList = toDoDBHandler.Read(username, toDoContext);
+    }
+    private void createRow()
+    {
+        toDoDBHandler.Create(newTaskName, newTaskDescription, username, toDoContext);
+        newTaskName = "";
+        newTaskDescription = "";
         toDoList = toDoDBHandler.Read(username, toDoContext);
     }
 
-    //toDoDBHandler.Create("","","", toDoContext);
-    //toDoDBHandler.Read("", toDoContext);
-    //toDoDBHandler.Update("", "", 1, toDoContext);
-    //toDoDBHandler.Delete("", "", 10, toDoContext);
-
+    private void selectUpdateRow(ToDo todo)
+    {
+        disableUpdate = false; 
+        updateTaskId = todo.Id;
+        updateTaskName = todo.TaskName;
+        updateTaskDescription = todo.TaskDescription;
+    }
+    private void updateRow()
+    {
+        toDoDBHandler.Update(updateTaskName, updateTaskDescription, updateTaskId, toDoContext);
+        updateTaskId = 0;
+        updateTaskName = "";
+        updateTaskDescription = "";
+        disableUpdate = true;
+        toDoList = toDoDBHandler.Read(username, toDoContext);
+    }
     private void deleteRow(ToDo todo)
     {
         toDoDBHandler.Delete(todo.Id, toDoContext);
-
         toDoList = toDoDBHandler.Read(username, toDoContext);
     }
 

@@ -1,5 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-using H5ServerSideProgrammeringMJ.Models;
+﻿using H5ServerSideProgrammeringMJ.Models;
 using H5ServerSideProgrammeringMJ.Data;
 
 namespace H5ServerSideProgrammeringMJ.JCodes
@@ -22,7 +21,7 @@ namespace H5ServerSideProgrammeringMJ.JCodes
         // Read
         public List<ToDo> Read(string username, ToDoContext context)
         {
-            var toDoList = context.ToDos.ToList();
+            var toDoList = context.ToDos.Where(x => x.User == username).ToList();
             return toDoList;
         }
         // Update
