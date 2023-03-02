@@ -1,9 +1,31 @@
 ﻿@page "/"
+@using Microsoft.AspNetCore.Identity;
+
+@if (isAuthenticated)
+{
+    <p>Du er logget ind som: @username</p>
+}
+else
+{
+    <p>Velkommen! Du skal logge ind for at se din ToDo liste</p>
+}
+
 
 <PageTitle>Index</PageTitle>
 
-<h1>Hello, world!</h1>
+@code {
 
-Welcome to your new app.
+    [CascadingParameter]
+    private Task<AuthenticationState>? authenticationState { get; set; }
 
-<SurveyPrompt Title="How is Blazor working for you?" />
+    public string username { get; set; }
+    private bool isAuthenticated { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await authenticationState;
+        var user = authState.User;
+        username = user.Identity.Name;
+        isAuthenticated = user.Identity.IsAuthenticated;
+    }
+}
