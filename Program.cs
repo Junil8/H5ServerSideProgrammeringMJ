@@ -1,5 +1,6 @@
 using H5ServerSideProgrammeringMJ.Areas.Identity;
 using H5ServerSideProgrammeringMJ.Data;
+using H5ServerSideProgrammeringMJ.JCodes;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Web;
@@ -30,10 +31,7 @@ builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 builder.Services.AddScoped<AuthenticationStateProvider, RevalidatingIdentityAuthenticationStateProvider<IdentityUser>>();
 
-//// added from tut
-//builder.Services.AddDbContext<ToDoContext>();
-//builder.Services.AddDatabaseDeveloperPageExceptionFilter();
-//builder.Services.AddControllersWithViews();
+builder.Services.AddScoped<ToDoDBHandler>();
 
 var app = builder.Build();
 

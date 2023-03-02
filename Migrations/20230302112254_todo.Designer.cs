@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace H5ServerSideProgrammeringMJ.Migrations
 {
     [DbContext(typeof(ToDoContext))]
-    [Migration("20230302103414_todo")]
+    [Migration("20230302112254_todo")]
     partial class todo
     {
         /// <inheritdoc />
@@ -37,6 +37,10 @@ namespace H5ServerSideProgrammeringMJ.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("TaskName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("User")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 

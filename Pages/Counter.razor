@@ -1,4 +1,9 @@
-﻿@page "/counter"
+﻿
+@page "/counter"
+@using H5ServerSideProgrammeringMJ.Data;
+@using H5ServerSideProgrammeringMJ.JCodes;
+@inject ToDoDBHandler toDoDBHandler
+@inject ToDoContext toDoContext
 
 <PageTitle>Counter</PageTitle>
 
@@ -8,11 +13,19 @@
 
 <button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
 
+<button class="btn btn-primary" @onclick="testCreate">test Create</button>
+
 @code {
     private int currentCount = 0;
 
     private void IncrementCount()
     {
         currentCount++;
+    }
+
+
+    private void testCreate()
+    {
+        toDoDBHandler.Create("", toDoContext);
     }
 }
