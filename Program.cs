@@ -14,19 +14,13 @@ using static System.Formats.Asn1.AsnWriter;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
-try
-{
-    builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseFirebird(connectionString));
-    Console.WriteLine("YAY");
+var identityConnectionString = builder.Configuration.GetConnectionString("IdentityConnection") ?? throw new InvalidOperationException("Connection string 'IdentityConnection' not found.");
+//var todoConnectionString = builder.Configuration.GetConnectionString("ToDoConnection") ?? throw new InvalidOperationException("Connection string 'ToDoConnection' not found.");
 
-}
-catch (Exception e)
-{
-    Console.WriteLine("NAY \n" + e);
-    throw;
-}
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseSqlServer(identityConnectionString));
+//builder.Services.AddDbContext<ApplicationDbContext>(options =>
+//    options.UseSqlServer(todoConnectionString));
 
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
