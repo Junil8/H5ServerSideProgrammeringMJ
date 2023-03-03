@@ -1,9 +1,149 @@
 ﻿@page "/"
+@using H5ServerSideProgrammeringMJ.Data;
+@using H5ServerSideProgrammeringMJ.JCodes;
+@using H5ServerSideProgrammeringMJ.Models;
+@using Microsoft.AspNetCore.Identity;
+@inject NavigationManager NavManager
+@inject ToDoDBHandler toDoDBHandler
+@inject ToDoContext toDoContext
+@inject EncryptionJ encryptionJ
 
+@if (isAuthenticated)
+{
+    <p>Du er logget ind som: @username</p>
+
+    <input type="text" @bind="@newTaskName" @oninput="@((input) => { newTaskName = (string)input.Value; })">
+    <input type="text" @bind="@newTaskDescription" @oninput="@((input) => { newTaskDescription = (string)input.Value; })">
+    <button @onclick="() => createRow()">create</button>
+    <br />
+    <input disabled="@disableUpdate" type="text" @bind="@updateTaskName" @oninput="@((input) => { updateTaskName = (string)input.Value; })">
+    <input disabled="@disableUpdate" type="text" @bind="@updateTaskDescription" @oninput="@((input) => { updateTaskDescription = (string)input.Value; })">
+    <button disabled="@disableUpdate" @onclick="() => updateRow()">update</button>
+    <table>
+        <tr>
+            <th> Id</th>
+            <th> TaskName</th>
+            <th> TaskDescription</th>
+            <th> Actions </th>
+        </tr>
+        @foreach (ToDo todo in toDoList) // creates rows for all tasks connected to a user
+        {
+            <tr>
+                <td>@todo.Id</td>
+                <td>@todo.TaskName"</td>
+                <td>@decryptTaskDescription(@todo.TaskDescription)</td>
+                <button @onclick="() => selectUpdateRow(todo)">select</button>
+                <button @onclick="() => deleteRow(todo)">delete</button>
+                <button @onclick="() => GoToHashing(todo)">Check hashing</button>
+                <button @onclick="() => InterceptHashing(todo)">Intercepted Hashing check </button>
+            </tr>
+        }
+    </table>
+}
+else
+{
+    <p>Velkommen! Du skal logge ind for at se din ToDo liste</p>
+}
 <PageTitle>Index</PageTitle>
 
-<h1>Hello, world!</h1>
+@code {
 
-Welcome to your new app.
+    [CascadingParameter]
+    private Task<AuthenticationState>? authenticationState { get; set; }
 
-<SurveyPrompt Title="How is Blazor working for you?" />
+    public string username { get; set; }
+    private bool isAuthenticated { get; set; }
+    private List<ToDo> toDoList { get; set; }
+    //-----------------------------------------------------------
+    // Variables used to create a new task
+    private string newTaskName { get; set; }
+    private string newTaskDescription { get; set; }
+    //-----------------------------------------------------------
+    // Variables used for updating
+    private bool disableUpdate { get; set; }
+    private int updateTaskId { get; set; }
+    private string updateTaskName { get; set; }
+    private string updateTaskDescription { get; set; }
+    //-----------------------------------------------------------
+    // On initialize checks of user is logged in, reads todo table etc.
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await authenticationState;
+        var user = authState.User;
+        username = user.Identity.Name;
+        isAuthenticated = user.Identity.IsAuthenticated;
+        disableUpdate = true;
+
+        toDoList = toDoDBHandler.ReadAll(username, toDoContext);
+    }
+    //-----------------------------------------------------------
+    // Decrypts taskdescription in the table
+    private string decryptTaskDescription(string taskDescription)
+    {
+        return taskDescription = encryptionJ.DecryptString(taskDescription);
+    }
+    //-----------------------------------------------------------
+    // Sends the todo taskdescription to hashing check
+    private void GoToHashing(ToDo todo)
+    {
+        NavManager.NavigateTo($"/hashingcheck/{todo.TaskDescription}/{todo.Id}");
+    }
+    //-----------------------------------------------------------
+    // Used to test when an invalid value is passed to the hashing check
+    private void InterceptHashing(ToDo todo)
+    {
+        string newTaskDescription = "intercepted";
+        NavManager.NavigateTo($"/hashingcheck/{newTaskDescription}/{todo.Id}");
+    }
+    //-----------------------------------------------------------
+    // Creates a new row with taskdescription encrypred, resets create input, refreshes all rows
+    private void createRow()
+    {
+        if (newTaskName != null && newTaskName != "" && newTaskDescription != null && newTaskDescription != "")
+        {
+            newTaskDescription = encryptionJ.EncryptString(newTaskDescription);
+
+            toDoDBHandler.Create(newTaskName, newTaskDescription, username, toDoContext);
+            newTaskName = "";
+            newTaskDescription = "";
+
+            toDoList = toDoDBHandler.ReadAll(username, toDoContext);
+        }
+    }
+    //-----------------------------------------------------------
+    // Enables the selected row to be updated, decrypts taskdescription until updateRow button is pressed
+    private void selectUpdateRow(ToDo todo)
+    {
+        disableUpdate = false;
+        updateTaskId = todo.Id;
+        updateTaskName = todo.TaskName;
+        updateTaskDescription = todo.TaskDescription;
+        updateTaskDescription = encryptionJ.DecryptString(updateTaskDescription);
+    }
+    //-----------------------------------------------------------
+    // Encrypt taskdescription input, updates database, resets variables, refreshes all rows
+    private void updateRow()
+    {
+        updateTaskDescription = encryptionJ.EncryptString(updateTaskDescription);
+        toDoDBHandler.Update(updateTaskName, updateTaskDescription, updateTaskId, toDoContext);
+        updateTaskId = 0;
+        updateTaskName = "";
+        updateTaskDescription = "";
+        disableUpdate = true;
+
+        toDoList = toDoDBHandler.ReadAll(username, toDoContext);
+    }
+    //-----------------------------------------------------------
+    // Deletes row and refreshes all rows
+    private void deleteRow(ToDo todo)
+    {
+        toDoDBHandler.Delete(todo.Id, toDoContext);
+
+        updateTaskId = 0;
+        updateTaskName = "";
+        updateTaskDescription = "";
+        disableUpdate = true;
+
+        toDoList = toDoDBHandler.ReadAll(username, toDoContext);
+    }
+}

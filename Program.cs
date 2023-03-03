@@ -1,5 +1,6 @@
 using H5ServerSideProgrammeringMJ.Areas.Identity;
 using H5ServerSideProgrammeringMJ.Data;
+using H5ServerSideProgrammeringMJ.JCodes;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Web;
@@ -15,12 +16,13 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 var identityConnectionString = builder.Configuration.GetConnectionString("IdentityConnection") ?? throw new InvalidOperationException("Connection string 'IdentityConnection' not found.");
-//var todoConnectionString = builder.Configuration.GetConnectionString("ToDoConnection") ?? throw new InvalidOperationException("Connection string 'ToDoConnection' not found.");
+var todoConnectionString = builder.Configuration.GetConnectionString("ToDoConnection") ?? throw new InvalidOperationException("Connection string 'ToDoConnection' not found.");
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(identityConnectionString));
-//builder.Services.AddDbContext<ApplicationDbContext>(options =>
-//    options.UseSqlServer(todoConnectionString));
+
+builder.Services.AddDbContext<ToDoContext>(options =>
+    options.UseSqlServer(todoConnectionString));
 
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
@@ -29,13 +31,10 @@ builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 builder.Services.AddScoped<AuthenticationStateProvider, RevalidatingIdentityAuthenticationStateProvider<IdentityUser>>();
 
-// added from tut
-builder.Services.AddDbContext<ToDoContext>();
-builder.Services.AddDatabaseDeveloperPageExceptionFilter();
-builder.Services.AddControllersWithViews();
+builder.Services.AddScoped<ToDoDBHandler>();
+builder.Services.AddScoped<EncryptionJ>();
 
-//var context = services.GetRequiredService<ToDoContext>();
-//ToDoInitializer.Initialize(context);
+builder.Services.AddDataProtection();
 
 var app = builder.Build();
 
