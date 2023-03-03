@@ -26,7 +26,7 @@
             <th> TaskDescription</th>
             <th> Actions </th>
         </tr>
-        @foreach (ToDo todo in toDoList)
+        @foreach (ToDo todo in toDoList) // creates rows for all tasks connected to a user
         {
             <tr>
                 <td>@todo.Id</td>
@@ -53,17 +53,19 @@ else
 
     public string username { get; set; }
     private bool isAuthenticated { get; set; }
-
     private List<ToDo> toDoList { get; set; }
-
+    //-----------------------------------------------------------
+    // Variables used to create a new task
     private string newTaskName { get; set; }
     private string newTaskDescription { get; set; }
-
+    //-----------------------------------------------------------
+    // Variables used for updating
     private bool disableUpdate { get; set; }
     private int updateTaskId { get; set; }
     private string updateTaskName { get; set; }
     private string updateTaskDescription { get; set; }
-
+    //-----------------------------------------------------------
+    // On initialize checks of user is logged in, reads todo table etc.
     protected override async Task OnInitializedAsync()
     {
         var authState = await authenticationState;
@@ -74,38 +76,52 @@ else
 
         toDoList = toDoDBHandler.ReadAll(username, toDoContext);
     }
-
+    //-----------------------------------------------------------
+    // Decrypts taskdescription in the table
     private string decryptTaskDescription(string taskDescription)
     {
         return taskDescription = encryptionJ.DecryptString(taskDescription);
     }
-
+    //-----------------------------------------------------------
+    // Sends the todo taskdescription to hashing check
     private void GoToHashing(ToDo todo)
     {
         NavManager.NavigateTo($"/hashingcheck/{todo.TaskDescription}/{todo.Id}");
     }
+    //-----------------------------------------------------------
+    // Used to test when an invalid value is passed to the hashing check
     private void InterceptHashing(ToDo todo)
     {
         string newTaskDescription = "intercepted";
         NavManager.NavigateTo($"/hashingcheck/{newTaskDescription}/{todo.Id}");
     }
+    //-----------------------------------------------------------
+    // Creates a new row with taskdescription encrypred, resets create input, refreshes all rows
     private void createRow()
     {
-        newTaskDescription = encryptionJ.EncryptString(newTaskDescription);
-        toDoDBHandler.Create(newTaskName, newTaskDescription, username, toDoContext);
-        newTaskName = "";
-        newTaskDescription = "";
+        if (newTaskName != null && newTaskName != "" && newTaskDescription != null && newTaskDescription != "")
+        {
+            newTaskDescription = encryptionJ.EncryptString(newTaskDescription);
 
-        toDoList = toDoDBHandler.ReadAll(username, toDoContext);
+            toDoDBHandler.Create(newTaskName, newTaskDescription, username, toDoContext);
+            newTaskName = "";
+            newTaskDescription = "";
+
+            toDoList = toDoDBHandler.ReadAll(username, toDoContext);
+        }
     }
+    //-----------------------------------------------------------
+    // Enables the selected row to be updated, decrypts taskdescription until updateRow button is pressed
     private void selectUpdateRow(ToDo todo)
     {
-        disableUpdate = false; 
+        disableUpdate = false;
         updateTaskId = todo.Id;
         updateTaskName = todo.TaskName;
         updateTaskDescription = todo.TaskDescription;
         updateTaskDescription = encryptionJ.DecryptString(updateTaskDescription);
     }
+    //-----------------------------------------------------------
+    // Encrypt taskdescription input, updates database, resets variables, refreshes all rows
     private void updateRow()
     {
         updateTaskDescription = encryptionJ.EncryptString(updateTaskDescription);
@@ -117,9 +133,17 @@ else
 
         toDoList = toDoDBHandler.ReadAll(username, toDoContext);
     }
+    //-----------------------------------------------------------
+    // Deletes row and refreshes all rows
     private void deleteRow(ToDo todo)
     {
         toDoDBHandler.Delete(todo.Id, toDoContext);
+
+        updateTaskId = 0;
+        updateTaskName = "";
+        updateTaskDescription = "";
+        disableUpdate = true;
+
         toDoList = toDoDBHandler.ReadAll(username, toDoContext);
     }
 }
