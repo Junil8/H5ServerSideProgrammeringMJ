@@ -35,10 +35,10 @@
                 <button @onclick="() => selectUpdateRow(todo)">select</button>
                 <button @onclick="() => deleteRow(todo)">delete</button>
                 <button @onclick="() => GoToHashing(todo)">Check hashing</button>
+                <button @onclick="() => InterceptHashing(todo)">Intercepted Hashing check </button>
             </tr>
         }
     </table>
-
 }
 else
 {
@@ -82,10 +82,13 @@ else
 
     private void GoToHashing(ToDo todo)
     {
-        //string taskDescriptionFromUser = decryptTaskDescription(todo.TaskDescription);
         NavManager.NavigateTo($"/hashingcheck/{todo.TaskDescription}/{todo.Id}");
     }
-
+    private void InterceptHashing(ToDo todo)
+    {
+        string newTaskDescription = "intercepted";
+        NavManager.NavigateTo($"/hashingcheck/{newTaskDescription}/{todo.Id}");
+    }
     private void createRow()
     {
         newTaskDescription = encryptionJ.EncryptString(newTaskDescription);
