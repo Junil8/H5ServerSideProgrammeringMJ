@@ -3,6 +3,7 @@
 @using H5ServerSideProgrammeringMJ.JCodes;
 @using H5ServerSideProgrammeringMJ.Models;
 @using Microsoft.AspNetCore.Identity;
+@inject NavigationManager NavManager
 @inject ToDoDBHandler toDoDBHandler
 @inject ToDoContext toDoContext
 @inject EncryptionJ encryptionJ
@@ -23,19 +24,21 @@
             <th> Id</th>
             <th> TaskName</th>
             <th> TaskDescription</th>
-            <th>   </th>
+            <th> Actions </th>
         </tr>
         @foreach (ToDo todo in toDoList)
         {
             <tr>
                 <td>@todo.Id</td>
                 <td>@todo.TaskName"</td>
-                <td>@testde(@todo.TaskDescription)</td>
+                <td>@decryptTaskDescription(@todo.TaskDescription)</td>
                 <button @onclick="() => selectUpdateRow(todo)">select</button>
                 <button @onclick="() => deleteRow(todo)">delete</button>
+                <button @onclick="() => GoToHashing(todo)">Check hashing</button>
             </tr>
         }
     </table>
+
 }
 else
 {
@@ -69,14 +72,20 @@ else
         isAuthenticated = user.Identity.IsAuthenticated;
         disableUpdate = true;
 
-        toDoList = toDoDBHandler.Read(username, toDoContext);
+        toDoList = toDoDBHandler.ReadAll(username, toDoContext);
     }
 
-    private string testde(string test)
+    private string decryptTaskDescription(string taskDescription)
     {
-        test = encryptionJ.DecryptString(test);
-        return test;
+        return taskDescription = encryptionJ.DecryptString(taskDescription);
     }
+
+    private void GoToHashing(ToDo todo)
+    {
+        //string taskDescriptionFromUser = decryptTaskDescription(todo.TaskDescription);
+        NavManager.NavigateTo($"/hashingcheck/{todo.TaskDescription}/{todo.Id}");
+    }
+
     private void createRow()
     {
         newTaskDescription = encryptionJ.EncryptString(newTaskDescription);
@@ -84,7 +93,7 @@ else
         newTaskName = "";
         newTaskDescription = "";
 
-        toDoList = toDoDBHandler.Read(username, toDoContext);
+        toDoList = toDoDBHandler.ReadAll(username, toDoContext);
     }
     private void selectUpdateRow(ToDo todo)
     {
@@ -103,11 +112,11 @@ else
         updateTaskDescription = "";
         disableUpdate = true;
 
-        toDoList = toDoDBHandler.Read(username, toDoContext);
+        toDoList = toDoDBHandler.ReadAll(username, toDoContext);
     }
     private void deleteRow(ToDo todo)
     {
         toDoDBHandler.Delete(todo.Id, toDoContext);
-        toDoList = toDoDBHandler.Read(username, toDoContext);
+        toDoList = toDoDBHandler.ReadAll(username, toDoContext);
     }
 }

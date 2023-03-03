@@ -1,0 +1,36 @@
+﻿@page "/hashingcheck/{TaskDescriptionFromUser}/{todoId}"
+@using H5ServerSideProgrammeringMJ.Data;
+@using H5ServerSideProgrammeringMJ.JCodes;
+@using H5ServerSideProgrammeringMJ.Models;
+@using System.Security.Cryptography;
+@inject ToDoDBHandler toDoDBHandler
+@inject ToDoContext toDoContext
+
+<h3>HashingCheck</h3>
+
+@if (@HashMatch)
+{
+    <p>Match found!</p>
+}
+else
+{
+    <p>Match not found!</p>
+}
+
+@code {
+    [Parameter]
+    public string TaskDescriptionFromUser { get; set; }
+    [Parameter]
+    public string todoId { get; set; }
+
+    private ToDo ToDoFromDB { get; set; }
+    private bool HashMatch { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        string bcryptSalt = BCrypt.Net.BCrypt.GenerateSalt();
+        TaskDescriptionFromUser = BCrypt.Net.BCrypt.HashPassword(TaskDescriptionFromUser, bcryptSalt);
+        ToDoFromDB = toDoDBHandler.ReadById("test@mail.com", Int32.Parse(todoId), toDoContext);
+        HashMatch = BCrypt.Net.BCrypt.Verify(ToDoFromDB.TaskDescription, TaskDescriptionFromUser);
+    }
+}

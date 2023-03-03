@@ -20,11 +20,16 @@ namespace H5ServerSideProgrammeringMJ.JCodes
             return todo;
         }
         // Read
-        public List<ToDo> Read(string username, ToDoContext context)
+        public List<ToDo> ReadAll(string username, ToDoContext context)
         {
             List<ToDo> todoList = context.ToDos.Where(x => x.User == username).ToList();
 
             return todoList;
+        }
+        public ToDo ReadById(string username, int id, ToDoContext context)
+        {
+            ToDo todo = context.ToDos.Where(a => a.User == username).FirstOrDefault(x => x.Id == id);
+            return todo;
         }
         // Update
         public ToDo Update(string taskName, string TaskDescription, int id, ToDoContext context)
