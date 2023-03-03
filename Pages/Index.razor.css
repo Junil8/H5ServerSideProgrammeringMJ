@@ -9,4 +9,9 @@ tableContainer{
 
 table, td, th {
     border: 1px solid;
+    text-align:center;
+}
+th {
+    padding-left: 50px;
+    padding-right: 50px;
 }
