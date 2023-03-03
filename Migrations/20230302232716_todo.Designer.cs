@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace H5ServerSideProgrammeringMJ.Migrations
 {
     [DbContext(typeof(ToDoContext))]
-    [Migration("20230302210614_todo")]
+    [Migration("20230302232716_todo")]
     partial class todo
     {
         /// <inheritdoc />

@@ -32,6 +32,9 @@ builder.Services.AddServerSideBlazor();
 builder.Services.AddScoped<AuthenticationStateProvider, RevalidatingIdentityAuthenticationStateProvider<IdentityUser>>();
 
 builder.Services.AddScoped<ToDoDBHandler>();
+builder.Services.AddScoped<EncryptionJ>();
+
+builder.Services.AddDataProtection();
 
 var app = builder.Build();
 

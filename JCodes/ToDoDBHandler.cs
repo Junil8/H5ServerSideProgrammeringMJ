@@ -1,5 +1,6 @@
 ﻿using H5ServerSideProgrammeringMJ.Models;
 using H5ServerSideProgrammeringMJ.Data;
+using Microsoft.AspNetCore.DataProtection;
 
 namespace H5ServerSideProgrammeringMJ.JCodes
 {
@@ -21,8 +22,9 @@ namespace H5ServerSideProgrammeringMJ.JCodes
         // Read
         public List<ToDo> Read(string username, ToDoContext context)
         {
-            var toDoList = context.ToDos.Where(x => x.User == username).ToList();
-            return toDoList;
+            List<ToDo> todoList = context.ToDos.Where(x => x.User == username).ToList();
+
+            return todoList;
         }
         // Update
         public ToDo Update(string taskName, string TaskDescription, int id, ToDoContext context)
@@ -38,7 +40,7 @@ namespace H5ServerSideProgrammeringMJ.JCodes
         // Delete
         public ToDo Delete(int id, ToDoContext context)
         {
-            var result = context.ToDos.SingleOrDefault(todo => todo.Id ==  id);
+            var result = context.ToDos.SingleOrDefault(todo => todo.Id == id);
 
             context.ToDos.Remove(result);
             context.SaveChanges();

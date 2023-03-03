@@ -5,6 +5,7 @@
 @using Microsoft.AspNetCore.Identity;
 @inject ToDoDBHandler toDoDBHandler
 @inject ToDoContext toDoContext
+@inject EncryptionJ encryptionJ
 
 @if (isAuthenticated)
 {
@@ -17,7 +18,6 @@
     <input disabled="@disableUpdate" type="text" @bind="@updateTaskName" @oninput="@((input) => { updateTaskName = (string)input.Value; })">
     <input disabled="@disableUpdate" type="text" @bind="@updateTaskDescription" @oninput="@((input) => { updateTaskDescription = (string)input.Value; })">
     <button disabled="@disableUpdate" @onclick="() => updateRow()">update</button>
-
     <table>
         <tr>
             <th> Id</th>
@@ -30,13 +30,12 @@
             <tr>
                 <td>@todo.Id</td>
                 <td>@todo.TaskName"</td>
-                <td>@todo.TaskDescription</td>
+                <td>@testde(@todo.TaskDescription)</td>
                 <button @onclick="() => selectUpdateRow(todo)">select</button>
                 <button @onclick="() => deleteRow(todo)">delete</button>
             </tr>
         }
     </table>
-
 }
 else
 {
@@ -69,30 +68,41 @@ else
         username = user.Identity.Name;
         isAuthenticated = user.Identity.IsAuthenticated;
         disableUpdate = true;
-        toDoList = toDoDBHandler.Read(username, toDoContext);
-    }
-    private void createRow()
-    {
-        toDoDBHandler.Create(newTaskName, newTaskDescription, username, toDoContext);
-        newTaskName = "";
-        newTaskDescription = "";
+
         toDoList = toDoDBHandler.Read(username, toDoContext);
     }
 
+    private string testde(string test)
+    {
+        test = encryptionJ.DecryptString(test);
+        return test;
+    }
+    private void createRow()
+    {
+        newTaskDescription = encryptionJ.EncryptString(newTaskDescription);
+        toDoDBHandler.Create(newTaskName, newTaskDescription, username, toDoContext);
+        newTaskName = "";
+        newTaskDescription = "";
+
+        toDoList = toDoDBHandler.Read(username, toDoContext);
+    }
     private void selectUpdateRow(ToDo todo)
     {
         disableUpdate = false; 
         updateTaskId = todo.Id;
         updateTaskName = todo.TaskName;
         updateTaskDescription = todo.TaskDescription;
+        updateTaskDescription = encryptionJ.DecryptString(updateTaskDescription);
     }
     private void updateRow()
     {
+        updateTaskDescription = encryptionJ.EncryptString(updateTaskDescription);
         toDoDBHandler.Update(updateTaskName, updateTaskDescription, updateTaskId, toDoContext);
         updateTaskId = 0;
         updateTaskName = "";
         updateTaskDescription = "";
         disableUpdate = true;
+
         toDoList = toDoDBHandler.Read(username, toDoContext);
     }
     private void deleteRow(ToDo todo)
@@ -100,5 +110,4 @@ else
         toDoDBHandler.Delete(todo.Id, toDoContext);
         toDoList = toDoDBHandler.Read(username, toDoContext);
     }
-
 }

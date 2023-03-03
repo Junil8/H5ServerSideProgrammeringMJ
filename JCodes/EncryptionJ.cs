@@ -11,7 +11,6 @@ namespace H5ServerSideProgrammeringMJ.JCodes
             _dataProtector = protecter.CreateProtector("H5ServerSideProgrammeringMJ.Jcodes.EncryptionJ.Julian");
         } // Spørg om dette
 
-
         public string EncryptString(string stringValue) => _dataProtector.Protect(stringValue);
         public string DecryptString(string stringvalue) => _dataProtector.Unprotect(stringvalue);
 
